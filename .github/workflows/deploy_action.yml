@@ -2,7 +2,9 @@ name: Deploy to Github Action
 
 on:
   push:
-    branches: ["master", "original"]
+    branches:
+      - master
+      - original
 
 permissions:
   contents: read
