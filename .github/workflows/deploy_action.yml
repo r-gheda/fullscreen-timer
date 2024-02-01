@@ -2,10 +2,7 @@ name: Deploy to Github Action
 
 on:
   push:
-    branches: [master]
-    paths:
-      - "src/**"
-      - "package.json"
+    branches: ["master"]
 
 jobs:                               
   build:
