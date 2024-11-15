@@ -102,7 +102,15 @@ class App extends Component {
         if (!state.editing) {
           state.editing = 'second';
         }
-        state.t += (direction === 'up' ? 1 : -1) * (state.editing === 'second' ? 1 : 60);
+        if (state.editing === 'hour') {
+          state.t += (direction === 'up' ? 1 : -1) * 3600;
+        }
+        if (state.editing === 'minute') {
+          state.t += (direction === 'up' ? 1 : -1) * 60;
+        }
+        if (state.editing === 'second') {
+          state.t += (direction === 'up' ? 1 : -1);
+        }
         if (state.t < 0) {
           state.t = 0;
         }
