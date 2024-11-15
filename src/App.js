@@ -108,10 +108,32 @@ class App extends Component {
         }
         break;
       case 'left':
-        state.editing = 'minute';
+        if (!state.editing) {
+          state.editing = 'hour';
+        }
+        else if (state.editing === 'hour') {
+          state.editing = 'second';
+        }
+        else if (state.editing === 'minute') {
+          state.editing = 'hour';
+        }
+        else if (state.editing === 'second') {
+          state.editing = 'minute';
+        }
         break;
       case 'right':
-        state.editing = 'second';
+        if (!state.editing) {
+          state.editing = 'second';
+        }
+        else if (state.editing === 'hour') {
+          state.editing = 'minute';
+        }
+        else if (state.editing === 'minute') {
+          state.editing = 'second';
+        }
+        else if (state.editing === 'second') {
+          state.editing = 'hour';
+        }
         break;
       default:
         break;
@@ -153,13 +175,16 @@ class App extends Component {
   render() {
     const { t, paused, editing, mode, showCursor, fullscreen } = this.state;
     const second = parseInt(t % 60);
-    const minute = parseInt((t - second) / 60);
+    const minute = parseInt((t / 60) % 60);
+    const hour = parseInt(t / 3600);
     return (
       <div className="App">
         <div
           className={clsx('clock', { 'show-cursor': showCursor })}
           onDoubleClick={() => this.toggleFullScreen()}
         >
+          <span className={clsx('time hour', { editing: editing === 'hour' })}>{pad(hour)}</span>
+          :
           <span className={clsx('time minute', { editing: editing === 'minute' })}>{pad(minute)}</span>
           :
           <span className={clsx('time second', { editing: editing === 'second' })}>{pad(second)}</span>
