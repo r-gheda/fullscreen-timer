@@ -11,7 +11,6 @@ class App extends Component {
     super(props);
     this.state = {
       t: 0,
-      tStart:  0,
       paused: true,
       mode: 'stopwatch',
       fullscreen: false,
@@ -35,7 +34,7 @@ class App extends Component {
   }
 
   tick() {
-    const { mode, paused, showCursor, editing, tStart } = this.state;
+    const { mode, paused, showCursor, editing } = this.state;
     if (editing) {
       this.setState({ showCursor: !showCursor });
     }
@@ -44,7 +43,7 @@ class App extends Component {
       const t = prevState.t + (mode === 'countdown' ? -1 : 1) * 0.5;
       if (t <= 0) {
         return {
-          t: mode === 'countdown' ? tStart : 0,
+          t: 0,
           paused: true,
         }
       } else {
@@ -68,9 +67,8 @@ class App extends Component {
   }
 
   resetTimer = () => {
-    const { mode, tStart } = this.state;
     this.setState({
-      t: mode === 'countdown' ? tStart : 0,
+      t: 0,
       paused: true
     });
   }
@@ -78,7 +76,6 @@ class App extends Component {
   switchMode = (mode) => {
     this.setState({
       mode: mode || (this.state.mode === 'stopwatch' ? 'countdown' : 'stopwatch'),
-      tStart: (mode === 'countdown' || this.state.mode === 'stopwatch') ? this.state.t : 0
     })
   }
 
@@ -105,21 +102,50 @@ class App extends Component {
         if (!state.editing) {
           state.editing = 'second';
         }
-        state.t += (direction === 'up' ? 1 : -1) * (state.editing === 'second' ? 1 : 60);
+        if (state.editing === 'hour') {
+          state.t += (direction === 'up' ? 1 : -1) * 3600;
+        }
+        if (state.editing === 'minute') {
+          state.t += (direction === 'up' ? 1 : -1) * 60;
+        }
+        if (state.editing === 'second') {
+          state.t += (direction === 'up' ? 1 : -1);
+        }
         if (state.t < 0) {
           state.t = 0;
         }
         break;
       case 'left':
-        state.editing = 'minute';
+        if (!state.editing) {
+          state.editing = 'hour';
+        }
+        else if (state.editing === 'hour') {
+          state.editing = 'second';
+        }
+        else if (state.editing === 'minute') {
+          state.editing = 'hour';
+        }
+        else if (state.editing === 'second') {
+          state.editing = 'minute';
+        }
         break;
       case 'right':
-        state.editing = 'second';
+        if (!state.editing) {
+          state.editing = 'second';
+        }
+        else if (state.editing === 'hour') {
+          state.editing = 'minute';
+        }
+        else if (state.editing === 'minute') {
+          state.editing = 'second';
+        }
+        else if (state.editing === 'second') {
+          state.editing = 'hour';
+        }
         break;
       default:
         break;
     }
-    state.tStart = state.mode === 'countdown' ? state.t : 0;
     this.setState(state);
   }
 
@@ -157,13 +183,16 @@ class App extends Component {
   render() {
     const { t, paused, editing, mode, showCursor, fullscreen } = this.state;
     const second = parseInt(t % 60);
-    const minute = parseInt((t - second) / 60);
+    const minute = parseInt((t / 60) % 60);
+    const hour = parseInt(t / 3600);
     return (
       <div className="App">
         <div
           className={clsx('clock', { 'show-cursor': showCursor })}
           onDoubleClick={() => this.toggleFullScreen()}
         >
+          <span className={clsx('time hour', { editing: editing === 'hour' })}>{pad(hour)}</span>
+          :
           <span className={clsx('time minute', { editing: editing === 'minute' })}>{pad(minute)}</span>
           :
           <span className={clsx('time second', { editing: editing === 'second' })}>{pad(second)}</span>
